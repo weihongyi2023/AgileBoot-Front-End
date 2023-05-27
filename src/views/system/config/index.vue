@@ -44,15 +44,14 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermission="['system:config:edit']"
-          >修改</el-button
-        >
+          <el-button
+                  type="primary"
+                  plain
+                  icon="el-icon-plus"
+                  size="mini"
+                  @click="handleAdd"
+                  v-hasPermission="['system:config:add']"
+          >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -107,24 +106,24 @@
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="configRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="参数名称" prop="configName">
-          <el-input v-model="form.configName" placeholder="请输入参数名称" :disabled="true" />
+          <el-input v-model="form.configName" placeholder="请输入参数名称" :disabled="disabledFlag" />
         </el-form-item>
         <el-form-item label="参数键名" prop="configKey">
-          <el-input v-model="form.configKey" placeholder="请输入参数键名" :disabled="true" />
+          <el-input v-model="form.configKey" placeholder="请输入参数键名" :disabled="disabledFlag" />
         </el-form-item>
         <el-form-item label="参数键值" prop="configValue">
-          <el-select v-if="form.configOptions.length > 0" v-model="form.configValue" placeholder="Select">
+          <el-select v-if="form.configOptions.length > 0" v-model="form.configValue" placeholder="Select" :disabled="disabledFlag">
             <el-option v-for="item in form.configOptions" :key="item" :label="item" :value="item" />
           </el-select>
-          <el-input v-else v-model="form.configValue" placeholder="请输入参数键值" />
+          <el-input v-else v-model="form.configValue" placeholder="请输入参数键值" :disabled="disabledFlag" />
         </el-form-item>
         <el-form-item label="允许修改" prop="isAllowChange">
-          <el-radio-group v-model="form.isAllowChange" :disabled="true">
-            <el-radio v-for="dict in sys_yes_no" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+          <el-radio-group v-model="form.isAllowChange" :disabled="disabledFlag">
+            <el-radio v-for="dict in sys_yes_no" :key="dict.value" :label="dict.label">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" :disabled="true" />
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" :disabled="disabledFlag" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -172,6 +171,7 @@ const data = reactive({
 });
 
 const { queryParams, form, rules } = toRefs(data);
+const disabledFlag = ref(true);
 
 /** 查询参数列表 */
 function getList() {
@@ -202,8 +202,10 @@ function reset() {
     configOptions: [],
     remark: undefined,
   };
+
   proxy.resetForm('configRef');
 }
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;
@@ -222,6 +224,15 @@ function handleSelectionChange(selection) {
   multiple.value = !selection.length;
 }
 
+/** 新增按钮操作 */
+function handleAdd() {
+    reset();
+    // 重置新增时的样式
+    disabledFlag.value = false;
+    open.value = true;
+    title.value = "添加参数";
+}
+
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
@@ -230,17 +241,28 @@ function handleUpdate(row) {
     form.value = response;
     open.value = true;
     title.value = '修改参数';
+    disabledFlag.value = false;
+    console.error(typeof  sys_yes_no);
+
   });
 }
 /** 提交按钮 */
 function submitForm() {
   proxy.$refs.configRef.validate((valid) => {
     if (valid) {
-      configApi.updateConfig(form.value).then(() => {
-        proxy.$modal.msgSuccess('修改成功');
-        open.value = false;
-        getList();
-      });
+        if (form.value.configId != undefined) {
+            configApi.updateConfig(form.value).then(() => {
+                proxy.$modal.msgSuccess('修改成功');
+                open.value = false;
+                getList();
+            });
+        } else {
+            configApi.addConfig(form.value).then(() => {
+                proxy.$modal.msgSuccess('新增成功');
+                open.value = false;
+                getList();
+            });
+        }
     }
   });
 }

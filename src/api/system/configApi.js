@@ -29,12 +29,20 @@ export function getDictType(dictType) {
 // 修改参数配置
 export function updateConfig(data) {
   return request({
-    url: '/system/config',
+    url: '/system/config/update',
     method: 'put',
     data,
   });
 }
 
+// 新增参数配置
+export function addConfig(data) {
+  return request({
+    url: '/system/config/add',
+    method: 'post',
+    data,
+  });
+}
 
 // 刷新参数缓存
 export function refreshCache() {

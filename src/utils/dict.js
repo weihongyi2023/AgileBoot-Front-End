@@ -9,7 +9,6 @@ export function useDict(...args) {
     args.forEach((d, index) => {
       res.value[d] = [];
       const dictTypes = store.getters && store.getters.dictTypes;
-
       if (dictTypes[d]) {
         res.value[d] = dictTypes[d].map((p) => ({ label: p.label, value: p.value, elTagType: p.cssTag }));
       } else {
