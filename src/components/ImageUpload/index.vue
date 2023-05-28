@@ -107,15 +107,28 @@ function handleRemove(file, files) {
 }
 
 // 上传成功回调
-function handleUploadSuccess(res) {
-  uploadList.value.push({ name: res.fileName, url: res.fileName });
-  if (uploadList.value.length === number.value) {
-    fileList.value = fileList.value.filter((f) => f.url !== undefined).concat(uploadList.value);
-    uploadList.value = [];
-    number.value = 0;
-    emit('update:modelValue', listToString(fileList.value));
-    proxy.$modal.closeLoading();
-  }
+function handleUploadSuccess(res, file) {
+    if (res.code === 0) {
+        uploadList.value.push({ name: res.data.url, url: res.data.url });
+        uploadedSuccessfully();
+    } else {
+        number.value--;
+        proxy.$modal.closeLoading();
+        proxy.$modal.msgError(res.msg);
+        proxy.$refs.imageUpload.handleRemove(file);
+        uploadedSuccessfully();
+    }
+}
+
+// 上传结束处理
+function uploadedSuccessfully() {
+    if (number.value > 0 && uploadList.value.length === number.value) {
+        fileList.value = fileList.value.filter(f => f.url !== undefined).concat(uploadList.value);
+        uploadList.value = [];
+        number.value = 0;
+        emit("update:modelValue", listToString(fileList.value));
+        proxy.$modal.closeLoading();
+    }
 }
 
 // 上传前loading加载

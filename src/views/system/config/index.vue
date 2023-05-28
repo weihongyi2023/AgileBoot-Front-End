@@ -119,7 +119,8 @@
         </el-form-item>
         <el-form-item label="允许修改" prop="isAllowChange">
           <el-radio-group v-model="form.isAllowChange" :disabled="disabledFlag">
-            <el-radio v-for="dict in sys_yes_no" :key="dict.value" :label="dict.label">{{ dict.label }}</el-radio>
+            <!--把label数据库中label字段的类型为int类型，而radio的值默认应该是string类型，所以radio不会默认选中。解决办法：把int转成String类型-->
+            <el-radio v-for="dict in sys_yes_no" :key="dict.value" :label="''+dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -239,11 +240,9 @@ function handleUpdate(row) {
   const configId = row.configId || ids.value;
   configApi.getConfig(configId).then((response) => {
     form.value = response;
+    disabledFlag.value = form.value.isAllowChange == "1" ? false : true;
     open.value = true;
     title.value = '修改参数';
-    disabledFlag.value = false;
-    console.error(typeof  sys_yes_no);
-
   });
 }
 /** 提交按钮 */
