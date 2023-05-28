@@ -231,7 +231,8 @@ function handleSelectionChange(selection) {
 function handleAdd(row) {
     reset();
     categoryApi.listPmsProductCategory().then((response) => {
-        categoryOptions.value = proxy.handleTree(response, 'id');
+        categoryOptions.value = proxy.handleTree(response.rows, 'id');
+        console.log(response.rows);
     });
     if (row != undefined) {
         form.value.parentId = row.id;
