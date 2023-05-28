@@ -1,19 +1,18 @@
 import request from '@/utils/request'
 
 // 查询商品分类列表
-export function listPmsProductCategory(query, pageReq) {
+export function listPmsProductCategory(query) {
   return request({
-    url: '/pms/productCategory/list',
+    url: '/pms/category/list',
     method: 'post',
-    data: query,
-    params: pageReq
+    data:query
   })
 }
 
 // 查询商品分类详细
 export function getPmsProductCategory(id) {
   return request({
-    url: '/pms/productCategory/' + id,
+    url: '/pms/category/' + id,
     method: 'get'
   })
 }
@@ -21,7 +20,7 @@ export function getPmsProductCategory(id) {
 // 新增商品分类
 export function addPmsProductCategory(data) {
   return request({
-    url: '/pms/productCategory',
+    url: '/pms/category/add',
     method: 'post',
     data: data
   })
@@ -30,7 +29,7 @@ export function addPmsProductCategory(data) {
 // 修改商品分类
 export function updatePmsProductCategory(data) {
   return request({
-    url: '/pms/productCategory',
+    url: '/pms/category/update',
     method: 'put',
     data: data
   })
@@ -39,16 +38,7 @@ export function updatePmsProductCategory(data) {
 // 删除商品分类
 export function delPmsProductCategory(id) {
   return request({
-    url: '/pms/productCategory/' + id,
+    url: '/pms/category/' + id,
     method: 'delete'
-  })
-}
-
-// 导出商品分类
-export function exportPmsProductCategory(query) {
-  return request({
-    url: '/pms/productCategory/export',
-    method: 'get',
-    params: query
   })
 }

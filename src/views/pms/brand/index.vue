@@ -50,7 +50,6 @@
           <template #default="scope">
               <image-preview :src="scope.row.logo" :width="50" :height="50"/>
           </template>
-
       </el-table-column>
       <el-table-column label="名称" align="center" prop="name" />
       <el-table-column label="排序" align="center" prop="sort" />
