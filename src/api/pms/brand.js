@@ -43,11 +43,10 @@ export function delPmsBrand(id) {
   })
 }
 
-// 导出品牌管理
-export function exportPmsBrand(query) {
+export function allBrand(query) {
   return request({
-    url: '/pms/brand/export',
-    method: 'get',
-    query
+    url: '/pms/brand/all',
+    method: 'post',
+    data: query
   })
 }

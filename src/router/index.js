@@ -94,6 +94,19 @@ export const constantRoutes = [
       },
     ],
   },
+  {
+    path: '/pms/product/index',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'edit',
+        component: () => import('@/views/pms/product/AddProduct'),
+        name: 'AddProduct',
+        meta: { title: '编辑商品' }
+      }
+    ]
+  }
 ];
 
 const router = createRouter({

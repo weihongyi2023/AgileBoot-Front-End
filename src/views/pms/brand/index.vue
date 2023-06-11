@@ -111,7 +111,6 @@
 </template>
 
 <script setup>
-// import { listPmsBrand, getPmsBrand, delPmsBrand, addPmsBrand, updatePmsBrand, exportPmsBrand } from "@/api/pms/brand";
 import * as brandApi from "@/api/pms/brand";
 
 const { proxy } = getCurrentInstance();

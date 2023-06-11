@@ -5,6 +5,7 @@ import tagsView from './modules/tagsView';
 import permission from './modules/permission';
 import settings from './modules/settings';
 import getters from './getters';
+import mall from "@/store/modules/mall";
 
 const store = createStore({
   modules: {
@@ -13,6 +14,7 @@ const store = createStore({
     tagsView,
     permission,
     settings,
+    mall
   },
   getters,
 });

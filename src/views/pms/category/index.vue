@@ -129,6 +129,7 @@
 
 <script setup>
 import * as categoryApi from "@/api/pms/category";
+import * as deptApi from "@/api/system/deptApi";
 
 const { proxy } = getCurrentInstance();
 const { sys_status } = proxy.useDict('sys_status');
@@ -180,8 +181,7 @@ function getList() {
     categoryApi
         .listPmsProductCategory(queryParams.value)
         .then((res) => {
-            pmsProductCategoryList.value = res.rows;
-            total.value = res.total;
+            pmsProductCategoryList.value = proxy.handleTree(res, 'id');
         })
         .finally(() => {
             loading.value = false;
@@ -210,7 +210,6 @@ function reset() {
 
 /** 搜索按钮操作 */
 function handleQuery() {
-    queryParams.value.pageNum = 1;
     getList();
 }
 
@@ -231,8 +230,7 @@ function handleSelectionChange(selection) {
 function handleAdd(row) {
     reset();
     categoryApi.listPmsProductCategory().then((response) => {
-        categoryOptions.value = proxy.handleTree(response.rows, 'id');
-        console.log(response.rows);
+        categoryOptions.value = proxy.handleTree(response, 'id');
     });
     if (row != undefined) {
         form.value.parentId = row.id;

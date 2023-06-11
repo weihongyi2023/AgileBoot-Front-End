@@ -1,22 +1,44 @@
 <template>
   <div class="add-product-wrapper">
-    <el-form label-width="108px" :model="form" ref="form" :rules="rules">
+    <el-form label-width="108px" ref="pmsProductRef" :model="form" :rules="rules">
       <el-card style="margin: 20px 20px; font-size: 14px">
         <div slot="header">
           <span>基本信息</span>
         </div>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="商品名称" prop="name">
               <el-input v-model="form.name" placeholder="请输入商品名称"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="商品编码" prop="outProductId">
               <el-input v-model="form.outProductId" placeholder="请输入商品编码"></el-input>
             </el-form-item>
           </el-col>
+            <el-col :span="8">
+                <el-form-item label="排序" prop="sort">
+                    <el-input v-model="form.sort" placeholder="请输入排序"></el-input>
+                </el-form-item>
+            </el-col>
         </el-row>
+          <el-row>
+              <el-col :span="8">
+                  <el-form-item label="价格" prop="price">
+                      <el-input v-model="form.price" placeholder="请输入PRICE"></el-input>
+                  </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                  <el-form-item label="单位" prop="unit">
+                      <el-input v-model="form.unit" placeholder="请输入单位"></el-input>
+                  </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                  <el-form-item label="商品重量" prop="weight">
+                      <el-input v-model="form.weight" placeholder="商品重量，默认为克"></el-input>
+                  </el-form-item>
+              </el-col>
+          </el-row>
         <el-row>
           <el-col :span="8">
             <el-form-item label="品牌" prop="brandId">
@@ -28,36 +50,13 @@
               <product-category-select v-model="form.categoryId" @change="categoryChange"></product-category-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
-            <el-form-item label="排序" prop="sort">
-              <el-input v-model="form.sort" placeholder="请输入排序"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8">
-            <el-form-item label="价格" prop="price">
-              <el-input v-model="form.price" placeholder="请输入PRICE"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="单位" prop="unit">
-              <el-input v-model="form.unit" placeholder="请输入单位"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="商品重量" prop="weight">
-              <el-input v-model="form.weight" placeholder="商品重量，默认为克"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8">
-            <el-form-item label="上架状态">
-              <DictRadio v-model="form.publishStatus" size="small"
-                        :radioData="dict.type.pms_publish_status"/>
-            </el-form-item>
-          </el-col>
+            <el-col :span="8">
+                <el-form-item label="上架状态">
+                    <el-select v-model="queryParams.publishStatus" placeholder="上架状态">
+                        <el-option v-for="dict in pms_publish_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+                    </el-select>
+                </el-form-item>
+            </el-col>
         </el-row>
       </el-card>
 
@@ -66,13 +65,13 @@
           <span>产品图片</span>
         </div>
         <el-form-item label="主图" prop="pic">
-          <oss-image-upload v-model="form.pic" :limit="1"></oss-image-upload>
+            <image-upload v-model="form.pic" :limit="1"/>
         </el-form-item>
         <el-form-item label="轮播图" prop="albumPics">
-          <oss-image-upload v-model="albumPics" :limit="5"></oss-image-upload>
+            <image-upload v-model="form.albumPics" :limit="5"/>
         </el-form-item>
       </el-card>
-      
+
       <el-card style="margin: 20px 20px; font-size: 14px">
         <div slot="header">
           <span>产品规格</span>
@@ -83,12 +82,16 @@
               <div class="sku_sort" v-for="(s, idx0) in productAttr" :key="s.name">
                 <div class="label flex-center">
                   <div class="flex-one">
-                    <dict-select v-model="s.name" prop-name="sku_sort_list" value-prop="label"></dict-select>
-                  </div><a class="red" @click="deleteSkuSort(idx0)">删除规格类型</a>
+                      <el-select v-model="s.name" clearable>
+                          <el-option v-for="item in s.name" :key="item.value" :label="item.label" :value="item.value" />
+                      </el-select>
+                  </div>
+
                 </div>
                 <div class="values" v-if="s.name">
                   <div class="value" v-for="(it2, idx1) in s.options" :key="idx1">
-                    <el-input :value="it2.name" @input="changeName(s, idx1, $event)" placeholder="请输入规格名称"></el-input><a class="red no-break ml8" v-if="idx1 < s.options.length - 1 || (s.options.length === maxOptionNum &amp;&amp; idx1 === 3)" @click="deleteOption(s, idx1)">删除</a>
+                    <el-input :value="it2.name" @input="changeName(s, idx1, $event)" placeholder="请输入规格名称"></el-input>
+                      <a class="red no-break ml8" v-if="idx1 < s.options.length - 1 || (s.options.length === maxOptionNum &amp;&amp; idx1 === 3)" @click="deleteOption(s, idx1)">✕</a>
                   </div>
                 </div>
               </div>
@@ -101,13 +104,13 @@
           <el-table :data="form.skuList" :max-height="400">
             <el-table-column v-for="s in skuAttr" :label="s.name" :key="s.name" :prop="s.name"></el-table-column>
             <el-table-column label="展示图片">
-              <template v-slot="{ row }">
-                <oss-image-upload class="img-upload-mini" v-model="row.pic" :limit="1" :is-show-tip="false"></oss-image-upload>
+              <template #default="scope">
+                  <image-upload v-model="scope.row.pic" :limit="1" :is-show-tip="false"/>
               </template>
             </el-table-column>
             <el-table-column label="销售价格" >
               <template v-slot="{ row,$index }">
-                <el-form-item 
+                <el-form-item
                   :rules="{ required: true, message: '请填写价格', trigger: 'blur' }"
                   :prop="'skuList['+$index+'].price'">
                   <el-input v-model="row.price"></el-input>
@@ -135,9 +138,9 @@
         <el-form-item label="PC端" prop="detailHtml">
           <Editor v-model="form.detailHtml" placeholder="请输入内容" type=""></Editor>
         </el-form-item>
-        
+
       </el-card>
-      
+
       <div class="tc">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -146,175 +149,177 @@
   </div>
 </template>
 
-<script>
-import {addPmsProduct, getPmsProduct, updatePmsProduct} from "@/api/pms/product";
-import ProductCategorySelect from "@/views/components/ProductCategorySelect";
-import BrandSelect from "@/views/components/BrandSelect";
+<script setup>
+import * as productApi from "@/api/pms/product";
+import {reactive, toRefs} from "vue";
 
-export default {
-  name: "AddProduct",
-  dicts: ['pms_publish_status'],
-  components: {BrandSelect, ProductCategorySelect},
-  data() {
-    return {
-       rules: {
-          name: [
-            { required: true, message: '请输入商品名称', trigger: 'blur' }, 
-          ],
-       },
-      form: {},
-      skuAttr:[],
-      albumPics:null,
-      productAttr: [
+import BrandSelect from "@/views/components/BrandSelect.vue";
+import ProductCategorySelect from "@/views/components/ProductCategorySelect.vue";
+
+const router = useRouter();
+const { proxy } = getCurrentInstance();
+const { pms_publish_status } = proxy.useDict('pms_publish_status');
+
+const data = reactive({
+    // 表单参数
+    form: {},
+    // 查询参数
+    queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        brandId: null,
+        categoryId: null,
+        outProductId: null,
+        name: null,
+        pic: null,
+        albumPics: null,
+        publishStatus: null,
+        sort: null,
+        price: null,
+        unit: null,
+        weight: null,
+        detailHtml: null,
+        detailMobileHtml: null,
+        brandName: null,
+        productCategoryName: null,
+    },
+    // 表单校验
+    rules: {
+        name: [
+            { required: true, message: '请输入商品名称', trigger: 'blur' },
+        ],
+    },
+    skuAttr:[],
+    albumPics:null,
+    productAttr: [
         {
-          name: '颜色',
-          options: [
-            {name: '红'},
-            {name: null}
-          ]
+            name: '颜色',
+            options: [
+                {name: '红'},
+                {name: null}
+            ]
         }
-      ],
-      maxOptionNum: 44
-    }
-  },
-  created() {
-    const {id} = this.$route.query
+    ],
+    maxOptionNum: 44
+});
+
+let { queryParams, form, rules ,productAttr,albumPics,skuAttr} = toRefs(data);
+
+//生命周期钩子函数 在Vue 3 中取消了 beforeCreate 和 created 两个钩子函数，转而使用setup函数
+function queryList(){
+    const {id} = proxy.$route.query
     if (id) {
-      this.getInfo(id);
+        getInfo(id);
     }else{
-      this.form.sort=1000
-      this.form.publishStatus=0
+        form.sort=1000
+        form.publishStatus=0
     }
-  },
-  methods: {
-    refreshSku(){
-      let skus = [];
-      let skuMap = new Map()
-      this.skuAttr=[...this.productAttr]
-      if(this.form.skuList){
-        this.form.skuList.forEach(sku=>{
-          skuMap.set(sku.spData,sku)
+}
+// 执行函数
+queryList();
+
+
+/** 查询商品信息列表 */
+function refreshSku() {
+    let skus = [];
+    let skuMap = new Map()
+    skuAttr=[...productAttr]
+    if(form.skuList){
+       form.skuList.forEach(sku=>{
+            skuMap.set(sku.spData,sku)
         })
-      }
-      this.productAttr.forEach((attr, index) => {
+    }
+    this.productAttr.forEach((attr, index) => {
         const attrSku = [];
         attr.options.forEach((option) => {
-          if (!option.name) {
-            return
-          }
-          if (index === 0) {
-            attrSku.push({[attr.name]: option.name});
-          } else {
-            skus.forEach(it3 => {
-              attrSku.push({...it3, [attr.name]: option.name })
-            })
-          }
+            if (!option.name) {
+                return
+            }
+            if (index === 0) {
+                attrSku.push({[attr.name]: option.name});
+            } else {
+                skus.forEach(it3 => {
+                    attrSku.push({...it3, [attr.name]: option.name })
+                })
+            }
         })
         skus = attrSku;
-      })
-      skus.forEach(it => {
+    })
+    skus.forEach(it => {
         if(it){
-          it.spData=JSON.stringify(it)
+            it.spData=JSON.stringify(it)
         }
-      })
-      skus.forEach(it => {
+    })
+    skus.forEach(it => {
         let sku = skuMap.get(it.spData);
         if(sku){
-          it.outSkuId = sku.outSkuId;
-          it.price = sku.price;
-          it.pic = sku.pic;
+            it.outSkuId = sku.outSkuId;
+            it.price = sku.price;
+            it.pic = sku.pic;
         }else{
-          it.outSkuId = null;
-          it.price = null;
-          it.pic = null;
+            it.outSkuId = null;
+            it.price = null;
+            it.pic = null;
         }
-        
-      })
-      this.form.productAttr = JSON.stringify(this.productAttr)
-      this.form.skuList= skus
-    },
-    categoryChange(value){
-      if(Array.isArray(value)){
-        console.log(value.toString())
-        this.form.productCategoryName=value.toString()
-      }else{
-        this.form.productCategoryName=null
-      }
-      
-    },
-    onBrandChange(value){
-      this.form.brandName = value
-    },
-    getInfo(id) {
-      getPmsProduct(id).then(response => {
-        const {albumPics } = response
-        if (albumPics) {
-          this.albumPics = albumPics.split(',')
-        }
-        this.form = response;
-        if(this.form.productAttr){
-          this.productAttr =JSON.parse(this.form.productAttr)
-        }
-        this.refreshSku()
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if(this.albumPics){
-            this.form.albumPics = this.albumPics.toString()
-          }
-          if(this.form.categoryId && Array.isArray(this.form.categoryId)){
-            this.form.categoryId = this.form.categoryId.pop()
-          }
-          if (this.form.id != null) {
-            updatePmsProduct(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-            });
-          } else {
-            addPmsProduct(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-            });
-          }
-          this.cancel();
-        }else{
-          if(this.form.name){
-            this.$alert('请填写规格价格', '提示', {
-              confirmButtonText: '确定',
-            });
-          }else{
-            this.$alert('请填写商品名称', '提示', {
-              confirmButtonText: '确定',
-            });
-          }
-        }
-      });
-    },
-    cancel() {
-      this.$tab.closeOpenPage({ path: '/pms/product' })
-    },
-    changeName(s, idx, val) {
-      s.options[idx].name = val;
-      if (s.options.length - 1 !== idx || s.options.length >= this.maxOptionNum) {
-        return
-      }
-      s.options.push({name: null})
-    },
-    addSkuSort() {
-      this.productAttr.push({
-        name: null,
-        options: [{name: null}]
-      })
-    },
-    deleteSkuSort(idx) {
-      this.productAttr.splice(idx);
-    },
-    deleteOption(s, idx) {
-      s.options.splice(idx, 1);
-    }
-  }
+
+    })
+    form.productAttr = JSON.stringify(productAttr)
+    form.skuList= skus
 }
+
+function getInfo(id) {
+    productApi.getPmsProduct(id).then(response => {
+        let {albumPics } = response
+        if (albumPics) {
+            this.albumPics = albumPics.split(',')
+        }
+       form = response;
+        if(form.productAttr){
+            productAttr =JSON.parse(form.productAttr)
+        }
+        refreshSku()
+    });
+}
+
+/** 提交按钮 */
+function submitForm() {
+    proxy.$refs["form"].validate(valid => {
+        if (valid) {
+            if(albumPics){
+               form.albumPics = albumPics.toString()
+            }
+            if(form.categoryId && Array.isArray(form.categoryId)){
+                form.categoryId = form.categoryId.pop()
+            }
+            if (form.id != null) {
+                productApi.updatePmsProduct(form).then(response => {
+                    proxy.$modal.msgSuccess("修改成功");
+                });
+            } else {
+                productApi.addPmsProduct(form).then(response => {
+                    proxy.$modal.msgSuccess("新增成功");
+                });
+            }
+           cancel();
+        }else{
+            if(form.name){
+                proxy.$alert('请填写规格价格', '提示', {
+                    confirmButtonText: '确定',
+                });
+            }else{
+                proxy.$alert('请填写商品名称', '提示', {
+                    confirmButtonText: '确定',
+                });
+            }
+        }
+    });
+}
+
+/** 取消按钮 */
+function cancel() {
+    proxy.$tab.closeOpenPage({ path: '/pms/product' })
+}
+
 </script>
 
 <style lang="stylus">

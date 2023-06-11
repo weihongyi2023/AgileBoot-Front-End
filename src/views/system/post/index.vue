@@ -132,7 +132,6 @@
 </template>
 
 <script setup name="Post">
-// import { listPost, addPost, deletePost, getPost, updatePost } from '@/api/system/post';
 import * as postApi from '@/api/system/postApi';
 
 const { proxy } = getCurrentInstance();

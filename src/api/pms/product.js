@@ -1,12 +1,11 @@
 import request from '@/utils/request'
 
 // 查询商品信息列表
-export function listPmsProduct(query, pageReq) {
+export function listPmsProduct(query) {
   return request({
     url: '/pms/product/list',
     method: 'post',
-    data: query,
-    params: pageReq
+    data: query
   })
 }
 

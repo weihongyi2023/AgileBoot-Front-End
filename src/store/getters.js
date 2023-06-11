@@ -15,5 +15,8 @@ const getters = {
   topbarRouters: (state) => state.permission.topbarRouters,
   defaultRoutes: (state) => state.permission.defaultRoutes,
   sidebarRouters: (state) => state.permission.sidebarRouters,
+
+  productCategories: state => state.mall.productCategories,
+  brandList: state => state.mall.brandList,
 };
 export default getters;
